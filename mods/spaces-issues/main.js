@@ -386,33 +386,35 @@ export default class Spaces extends View {
           return r.code === 0 ? { value: JSON.parse(r.stdout) } : { error: r.stderr.trim() || "gh failed." };
         } catch (error) { return { error: String(error) }; }
       };
-      const [issue, prs] = await Promise.all([
+      const [repo, issue, prs] = await Promise.all([
+        gh(["repo", "view", "--json", "nameWithOwner,url"]),
         g.issue ? gh(["issue", "view", String(g.issue), "--json", "number,title,url,state"]) : {},
         gh(["pr", "list", "--head", g.head, "--state", "all", "--limit", "1", "--json", "number,title,url,state,isDraft"]),
       ]);
-      this.links[key] = { at: Date.now(), loaded: true, issue: issue.value ?? null, pr: prs.value?.[0] ?? null, error: issue.error ?? prs.error ?? "" };
+      this.links[key] = { at: Date.now(), loaded: true, repo: repo.value ?? null, issue: issue.value ?? null, pr: prs.value?.[0] ?? null, error: repo.error ?? issue.error ?? prs.error ?? "" };
       cx.notify();
     });
   }
 
-  // The card a hovered space shows: its branch, its issue, its pull request.
+  // The card a hovered space shows: its branch, its repository on GitHub, its issue, its pull request.
   card(w, g, t) {
     const l = this.links[`${g.repo}\u0000${g.head}`];
     const item = (kind, it) => v_flex().gap(4)
       .child(div().text_size(10.5).font_medium().text_color(t.dim).child(kind))
       .child(Link.new(`link-${w.id}-${kind}`).href(it.url).child(
         h_flex().gap(7).items_center().rounded(6).px(6).h(26).hover((s) => s.bg(t.hover))
-          .child(div().size(7).flex_none().rounded(4).bg(it.isDraft ? t.dim : t[STATE[it.state]] ?? t.dim))
-          .child(div().flex_1().min_w(0).truncate().text_color(t.foreground).child(it.title))
-          .child(div().flex_none().text_size(11).text_color(t.dim).child(`#${it.number}`))));
+          .when(Boolean(it.state), (el) => el.child(div().size(7).flex_none().rounded(4).bg(it.isDraft ? t.dim : t[STATE[it.state]] ?? t.dim)))
+          .child(div().flex_1().min_w(0).truncate().text_color(t.foreground).child(it.title ?? it.nameWithOwner))
+          .when(Boolean(it.number), (el) => el.child(div().flex_none().text_size(11).text_color(t.dim).child(`#${it.number}`)))));
     return v_flex().w(340).p(12).gap(10).rounded(8).bg(t.popover).border(1).border_color(t.border).shadow_lg().text_size(12.5)
       .child(v_flex().gap(2)
         .child(div().font_semibold().truncate().text_color(t.foreground).child(w.name))
         .child(div().text_size(11).truncate().text_color(t.dim).child(g.head)))
       .when(!l?.loaded, (el) => el.child(div().text_color(t.dim).child("\u2026")))
+      .when(Boolean(l?.repo), (el) => el.child(item("REPOSITORY", l.repo)))
       .when(Boolean(l?.issue), (el) => el.child(item("ISSUE", l.issue)))
       .when(Boolean(l?.pr), (el) => el.child(item("PULL REQUEST", l.pr)))
-      .when(Boolean(l?.loaded && !l.issue && !l.pr), (el) => el.child(div().text_color(t.dim).child(l.error || "No issue or pull request is linked to this branch.")));
+      .when(Boolean(l?.loaded && !l.issue && !l.pr), (el) => el.child(div().text_color(t.dim).child((!l.repo && l.error) || "No issue or pull request is linked to this branch.")));
   }
 
   // Only what's unusual, after the name: "herdr \u00b7 spike \u21912 \u21931". The repo or
@@ -443,8 +445,8 @@ export default class Spaces extends View {
     const colors = shared("space.colors") ?? {};
     const color = colors[w.id] ?? "ansi6";
     const fill = color.startsWith("#") ? color : (MARK[color] ?? t[color]);
-    // A worktree, or a branch with an issue, has something to say when hovered.
-    const carded = Boolean(g?.head && (g.issue || g.linked));
+    // A space on a branch has something to say when hovered: at least its repository.
+    const carded = Boolean(g?.head);
     const row = v_flex()
       .relative()
       .id(`space-${w.id}`)
