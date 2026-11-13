@@ -423,7 +423,9 @@ export default class IssueWorktree extends View {
       .when(this.named(), (el) => el
         .child(this.label(t, "Branch name"))
         .child(this.input(t, this.name, this.focus === "name"))
-        .child(div().text_size(12.5).text_color(t.dim).child(`${d.root.replace(home(), "~")}/${slug(typed) || "…"}`)))
+        .child(h_flex().gap(6).items_center().text_size(14).text_color(t.muted)
+          .child(svg(ICON("folder")).size(15).flex_none())
+          .child(div().flex_1().min_w(0).truncate().child(`${d.root.replace(home(), "~")}/${slug(typed) || "…"}`))))
       .when(Boolean(this.picked) || this.tab === "name", (el) => el.child(div().flex_1()));
   }
 
