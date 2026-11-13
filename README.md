@@ -1,6 +1,9 @@
 # herdr-issue-worktree
 
-A [Herdr](https://herdr.dev/) mod: a dialog that makes a git worktree from a GitHub issue or pull request, opens it as a space and starts an agent there. The issue stays linked to the branch.
+Two [Herdr](https://herdr.dev/) mods that tie git worktrees to GitHub issues and pull requests:
+
+- `issue-worktree`: a dialog that makes a worktree from an issue or pull request, opens it as a space and starts an agent there. The issue stays linked to the branch.
+- `spaces-issues`: Herdr's Spaces sidebar, where hovering a space shows its linked issue and pull request.
 
 ## Requirements
 
@@ -12,13 +15,28 @@ A [Herdr](https://herdr.dev/) mod: a dialog that makes a git worktree from a Git
 ```sh
 git clone https://github.com/meltin/herdr-issue-worktree ~/dev/oss/herdr-issue-worktree
 ln -s ~/dev/oss/herdr-issue-worktree/mods/issue-worktree ~/.config/herdr-app/mods/issue-worktree
+ln -s ~/dev/oss/herdr-issue-worktree/mods/spaces-issues ~/.config/herdr-app/mods/spaces-issues
 herdr-app check ~/.config/herdr-app/mods/issue-worktree
+herdr-app check ~/.config/herdr-app/mods/spaces-issues
 ```
+
+Either mod works without the other.
+
+### The dialog
 
 Open it with `herdr-app do mod.open '{"name":"issue-worktree"}'`, or bind a key in `~/.config/herdr-app/keys.json`:
 
 ```json
 { "global": { "cmd-shift-n": "mod.open:issue-worktree" } }
+```
+
+### The sidebar
+
+Herdr's layouts are read-only. To use `spaces-issues`, clone your layout and point its Spaces block at it:
+
+```sh
+herdr-app do layout.clone '{"name":"main","as":"main-issues"}'
+# in ~/.config/herdr-app/layouts/main-issues.json, change the Spaces block's "mod": "spaces" to "spaces-issues"
 ```
 
 ## Use
@@ -33,6 +51,8 @@ Tab chooses the agent to start, or a shell. For an issue the agent's first messa
 
 Worktrees go to `~/.herdr/worktrees/<repo>/<branch>`, where Herdr's own New worktree puts them, so Herdr's Open worktree and Remove worktree work on them.
 
+In the sidebar, rest the pointer on a space that is a worktree, or whose branch has an issue. A card shows the issue from `branch.<name>.issue` and the pull request whose head is that branch; click either to open it in the browser. To link a branch made elsewhere: `git config branch.<name>.issue <number>`.
+
 ## License
 
-Apache License 2.0. Parts of `mods/issue-worktree/main.js` are adapted from the `worktree` mod shipped with Herdr.app; see [NOTICE](NOTICE).
+Apache License 2.0. `mods/spaces-issues/main.js` is a modified copy of the `spaces` mod shipped with Herdr.app, and parts of `mods/issue-worktree/main.js` are adapted from its `worktree` mod; see [NOTICE](NOTICE).

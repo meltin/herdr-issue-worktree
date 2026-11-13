@@ -1,3 +1,10 @@
+mods/spaces-issues/main.js is a modified copy of the `spaces` mod that ships with
+Herdr.app (0.1.15), licensed under the Apache License 2.0 (see LICENSE).
+
+Changes: each space's git lookup also reads `branch.<name>.issue`; hovering a space
+that is a worktree, or whose branch has an issue, shows a card with the linked issue
+and the branch's pull request, asked of GitHub with `gh`.
+
 mods/issue-worktree/main.js adapts the git helpers (`repoOf`, the `git` wrapper) and the
-dialog's shape from the `worktree` mod that ships with Herdr.app (0.1.15), licensed under
-the Apache License 2.0 (see LICENSE).
+dialog's shape from the `worktree` mod that ships with Herdr.app (0.1.15), under the
+same license.
