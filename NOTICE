@@ -1,0 +1,3 @@
+mods/issue-worktree/main.js adapts the git helpers (`repoOf`, the `git` wrapper) and the
+dialog's shape from the `worktree` mod that ships with Herdr.app (0.1.15), licensed under
+the Apache License 2.0 (see LICENSE).
