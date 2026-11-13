@@ -1,1 +1,1 @@
-{ "place": "none", "title": "Issue worktree", "overlay": { "kind": "dialog", "width": 600, "height": 480 } }
+{ "place": "none", "title": "Issue worktree", "overlay": { "kind": "dialog", "modal": true, "width": 680, "height": 760 } }
